@@ -1,0 +1,59 @@
+一、maven中配置hibernate
+1、首先是pom.xml的配置，看HibernateFirst项目中的pom.xml。
+2、接着需要有hibernate.cfg.cml，这个文件要放在src/main/resources目录下。 这个文件和sql数据库的连接有关，包含有数据库的用户名，密码等信息。
+3、接着需要持久化类，放在src/main/java里，包名类名自建。
+4、接着在和持久化类同一个包下创建对象关系映射文件，name.hbm.xml。这个文件表示数据库和持久化类之间是怎么进行对应的。
+5、创建完hbm.xml之后需要在cfg.xml里面配置一下，加上<mapping  resources="hbm.xml"/>
+6、之后创建对应的数据库，表不用建，就可以进行测试运行了。
+
+二、hibernate初始化
+
+1、hibernate流程
+
+    应用程序
+	|
+  configuration-------cfg.cml
+	|
+  seessionFactory-------hbm.xml
+	|
+     session--------类似JDBC中的connection,query,ctiteria
+	|
+     Transaction----提交数据库，回滚
+
+2、cfg.xml常用配置
+
+show_sql  是否打印sql语句到控制台
+format_sql 输出的sql语句是否进行排版
+hbm2ddl.auto  选项有create|update|create-drop|validate，create每次会创建新表，upadte会保留原有数据进行更新。
+	
+3、hbm.xml常用配置
+
+见hibernateFirst里面的hbm
+
+
+4、对数据库进行操作的时候需要通过session开启一个事务，session用来做具体操作并进行保存，最后将事务提交才可以生效。不使用事务的方法是使用session的dowork方法进行自动提交，不推荐。
+
+5、初始化过程
+	a、获得session对象，可以使用openSession和getcurrentSession，使用第二种方法需要在cfg.xml中进行配置，<property name="hibernate.current_session_context_class">thread|jta</property>   其中thread表示是本地事务，jta表示全局事务。
+	b、getCurrentSession会自动关闭，每次使用现有的对象。openSession需要手动关闭，每次使用一个新的对象。
+6、Blob对象的读取与存储，使用Hibernate.getLobCreator(session).createBlob(in,length);
+
+7、组件属性  将另一个类Address的对象作为Student类的一个属性，而Address有三个属性，只会生成一张表。在hbm中要加上<component/>标签
+
+三、对数据库操作
+
+1、查	session.get(class,ID)  session.load(class,ID)  区别是 get是立即发出sql语句，返回持久化对象，如果没有返回null；load返回代理对象，只有id，直到使用其他属性的时候才会发出sql语句，如果没有，抛出异常。
+2、改   session.update(对象)
+3、删   session.delete(对象)
+4、增   session.save(对象)
+
+四、一对多
+1、在一里面用Set包含多的一方，实质用外键的形式进行约束。
+2、案例看HibernateSecond_Many2one
+
+五、多对一
+1、在多的一方持有一的一方的引用。调用多方的set方法加入自己到一方即可。
+
+六、双向多对一
+1、inverse属性，在一对多中进行配置，表示由谁来维护关联关系，默认为false即由一方维护。
+2、cascade属性，级联操作，选项有all(对所有操作级联)，save-update(保存和更新是操作)，delete(删除时级联)，none(所有操作不级联，默认是none)
