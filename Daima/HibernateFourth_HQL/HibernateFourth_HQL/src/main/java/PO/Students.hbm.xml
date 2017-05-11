@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 2017-5-10 11:59:51 by Hibernate Tools 3.4.0.CR1 -->
+<hibernate-mapping>
+    <class name="PO.Students" table="STUDENTS">  <!-- name是类名，table是映射的表名 -->
+        <id name="id" type="int">
+            <column name="ID" />
+            <generator class="assigned" />
+        </id>	<!-- 在id里面存的是主键的信息，name是类里面的属性名 column是字段名，generator是主键的生成策略，比如自增 -->
+        <property name="name" type="java.lang.String">
+            <column name="NAME" />
+        </property> <!-- property里面就是一些正常的属性和字段的映射 -->
+        <property name="sex" type="java.lang.String">
+            <column name="SEX" />
+        </property>
+        <property name="address" type="java.lang.String">
+            <column name="ADDRESS" />
+        </property>
+        <property name="birthday" type="java.util.Date">
+            <column name="BIRTHDAY" />
+        </property>
+        <property name="picture" type="java.sql.Blob">
+            <column name="PICTURE"></column>
+        </property>
+    </class>
+</hibernate-mapping>

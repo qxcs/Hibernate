@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 2017-5-11 0:23:02 by Hibernate Tools 3.4.0.CR1 -->
+<hibernate-mapping>
+    <class name="entity.Project" table="PROJECT">
+        <id name="pid" type="int">
+            <column name="PID" />
+            <generator class="assigned" />
+        </id>
+        <property name="proname" type="java.lang.String">
+            <column name="PRONAME" />
+        </property>
+        <set name="employees" table="PROEMP" cascade="all"><!--本表中包含的集合属性，第三张表名字  -->
+            <key>
+                <column name="rproid" /><!-- 这个是第三张表中和本表关联的外键名 -->
+            </key>
+            <many-to-many class="entity.Employee" column="rempid" /><!--集合属性用来多对多的类，已经对方类中相应的外键名  -->
+        </set>
+    </class>
+</hibernate-mapping>
