@@ -57,3 +57,80 @@ hbm2ddl.auto  选项有create|update|create-drop|validate，create每次会创建新表，up
 六、双向多对一
 1、inverse属性，在一对多中进行配置，表示由谁来维护关联关系，默认为false即由一方维护。
 2、cascade属性，级联操作，选项有all(对所有操作级联)，save-update(保存和更新是操作)，delete(删除时级联)，none(所有操作不级联，默认是none)
+
+七、多对多
+1、两个表，多对多，需要第三个表来存关系。
+2、核心代码是set的配置，在hibernateThird中查看映射文件。
+
+八、HQL查询
+
+1、HQL是面向对象的，即我们定义的实体表和属性。SQL是面向表单的。
+
+2、HQL语句形式  (select...) from... (where...) (group by...) (having...) (order by...)
+
+3、使用org.hibernate.query接口来执行HQL语句。Query query=session.createQuery("hql"); List<E> results=query.list();
+
+4、from语句。 最简单的HQL语句，（from 类名）（as 别名）。如果持久化类中有其他类的引用或者set，那么只有在使用到其他属性时才会执行相应的语句
+
+5、select语句。select s.id,s.name from student s  。当查询的字段有多个时，返回object[]集合；单个时，返回object集合。
+		也可以指定返回的类型，如果希望是list而不是object[]，那么加上类型就可以了： select new list(s.id,s.name) from student s.    list.get(0)得到s.id，list.get(1)得到s.name
+		也可以是map而不是object[]，那么加上类型就可以了： select new map(s.id,s.name) from student s. 需要注意的是map中是键值对的形式，map.get("0")得到s.id，map.get("1")得到s.name，也就是键是查询时对应属性名的位置的字符串值；当然也可以在查询属性时给属性起个别名，那么在map中就可以通过别名当做键，获得属性信息了。
+		也可以是自定义类型，在持久化类中添加包含相应字段的构造方法就好
+		distinct可以去除重复的元素。select distince s.sex from student
+
+6、where语句。限制条件
+		比较 ： where s.id>1
+		null: where s.id is null或者 where s.id is not null
+		范围: (not)in (列表) 或者 (not)between 值1 and 值2
+		字符串模式匹配 like:  % 匹配任意个字符； _  匹配一个字符。 from student s where s.name like '程_'
+		逻辑运算: and 逻辑与 ----from student s where s.id between 1 and 2 and s.name like '程%';id在1,2之间且名字叫程某某的
+			  or 逻辑或
+		集合运算: is (not) empty 集合是否为空----- from class c where c.student is not empty   查找学生不为空的班级
+			  member of  是否属于某集合
+		四则运算: +-*/  ------from student s where (s.age+10)>20  10年后年龄大于20岁的学生
+
+7、order by  可以使用asc升序  from student s order by s.age asc 按照年龄升序排列结果
+	     可以使用desc降序 from student s order by s.age desc 按照年龄降序排序结果
+	     多个规则         from student s order by s.age asc,s.name asc,s.id desc。用逗号分隔多个规则，规则优先级从前当后，前一个相同时，看后一个
+
+九、hibernate缓存
+
+1、缓存的作用是减少对数据库的查询，程序先在缓存其实就是内存中查找，如果命中就返回；没命中才会去数据库中查找，将结果加入缓存中并返回。
+2、一级缓存和session生命周期相同，强制不可取消。evict():将某对象从一级缓存中清除；clear():将一级缓存中的所有对象全部清除。
+   一级缓存其实也会在某些程度上影响程序性能，因为crud除了对数据库要操作，还需要更新缓存信息。
+   session.get()会使用一级缓存
+   query.list()方法不会使用一级缓存。
+   query.iterate()方法会先去数据库中查找所有的主键信息，然后在缓存中查找相应信息，找不到就去数据库中查找。
+
+3、二级缓存
+	目的是得到所有session都可以共用的缓存
+   开启二级缓存步骤
+	。。略复杂，到时候再学吧。现在学了不用估计也忘了。
+
+十、Hibernate注解
+1、注解的目的是  简化xml的配置
+2、注解的分类---类级别注解，属性级别注解，映射关系注解
+3、类级别注解 
+	@Entity(name="tableName")  这个注解表示这是一个实体类，里面的name可以省略，默认表名和类名是一样的；当表名和类名不一样时则不可以省略。使用这个注解的时候需要指定主键。 最后不要忘了在cfg中配置mapping中的class值，包名.类名
+	@Table(name="",catalog="" schema="") 和@Entity配合使用。schema是数据库名称，table是表名称，mysql不支持catalog
+	@Embeddable  表示是一个非Entity类，是一个嵌入类，可以嵌入到其他类中作为属性，对比之前的component属性。
+4、属性级别注解   可以添加在属性名字上面，也可以添加在get方法上面
+	@Id   定义为主键，可以有多个主键，需要实现Serializable接口
+
+	@GeneratedValue(strategy=GenerationType)  可选，用于定义主键生成策略。strategy取值有GenerationType.AUTO（默认）,GenerationType.INDENTITY,GenerationType.SEQUENCE,GenerationType.TABLE(结合@TableGenerator使用)
+	@GeneratedValue(generator="generatorName") JPA给的几种策略无法满足了，就使用hibernate的生成器。里面就是生成器的名字，显然还需要有生成器，就配合@GenericGenerator使用
+	@GenericGenerator(name="generatorName",Strategy="assigned") name就是刚才使用到的生成器的名字，strategy里面就是策略，这里的例子表示是手工赋值的方式。
+
+	@Column(name,nullable,unique,;ength,insertable,updateable) 将属性映射成字段的信息配置,用的最多的是length，规定字段的长度
+
+	@Embedded 注释属性的，表示该属性的类是嵌入类(用@Embeddable注释的类)
+	@EmbeddedId 注释属性的，表示这个属性是复合主键，也就是是一个嵌入类的对象作为主键。需要注意的是，主键类必须实现Serializable接口(相当于有多个主键了)，嵌入类必须有默认的无参构造方法，必须覆盖equals和hashcode方法
+
+	@Transient 表示该属性不会被映射到一个字段
+
+5、最后的最后，关联映射注解
+
+a、一对一单向外键
+	@OneToOne(cascade=CascadeType.ALL) 一对一关系，全部操作级联
+	@JoinColumn(name="foriegnKeyName",unique=true) name是被控方的主键，作为外键加到主控方的表中。需要注意的是应该先保存被控方，再保存主控方。
+	
