@@ -1,11 +1,19 @@
 package PO;
 
-import java.sql.Blob;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 
 import org.hibernate.annotations.GenericGenerator;
 
@@ -21,7 +29,22 @@ public class Students {
 	private String address;
 	private Date birthday;
 	
-	private Blob picture; //照片，测试用hibernate写入
+	//一对一
+	@OneToOne(cascade=CascadeType.ALL)
+	@JoinColumn(name="otherName")
+	private Relationship lover;
+	//多对一
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.EAGER)
+	@JoinColumn(name="cid",referencedColumnName="CID")
+	private ClassRoom classRoom;
+	//多对多
+	@ManyToMany
+	@JoinTable(
+			name="students2hobby",
+			joinColumns={@JoinColumn(name="id")},
+			inverseJoinColumns={@JoinColumn(name="hobbyId")}
+	)
+	private Set<Hobby> hobbies=new HashSet<Hobby>();
 	
 	public Students(){
 		
@@ -29,16 +52,6 @@ public class Students {
 
 	
 	
-	public Blob getPicture() {
-		return picture;
-	}
-
-
-
-	public void setPicture(Blob picture) {
-		this.picture = picture;
-	}
-
 
 
 	public Students(int id, String name, String sex, String address, Date birthday) {
@@ -91,10 +104,56 @@ public class Students {
 		this.birthday = birthday;
 	}
 
+	
+	
+	public Relationship getLover() {
+		return lover;
+	}
+
+
+
+	public void setLover(Relationship lover) {
+		this.lover = lover;
+	}
+
+
+
 	@Override
 	public String toString() {
 		return "Students [id=" + id + ", name=" + name + ", sex=" + sex + ", address=" + address + ", birthday="
 				+ birthday + "]";
+	}
+
+
+
+
+
+	public ClassRoom getClassRoom() {
+		return classRoom;
+	}
+
+
+
+
+
+	public void setClassRoom(ClassRoom classRoom) {
+		this.classRoom = classRoom;
+	}
+
+
+
+
+
+	public Set<Hobby> getHobbies() {
+		return hobbies;
+	}
+
+
+
+
+
+	public void setHobbies(Set<Hobby> hobbies) {
+		this.hobbies = hobbies;
 	}
 
 

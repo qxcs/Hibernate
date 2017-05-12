@@ -15,5 +15,9 @@
         <property name="hbm2ddl.auto">create</property>
         
         <mapping class="PO.Students"/>
+        <mapping class="PO.Relationship"/>
+        <mapping class="PO.ClassRoom"/>
+        <mapping class="PO.Teacher"/>
+        <mapping class="PO.Hobby"/>
     </session-factory>
 </hibernate-configuration>
