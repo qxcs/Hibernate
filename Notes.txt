@@ -133,4 +133,29 @@ hbm2ddl.auto  选项有create|update|create-drop|validate，create每次会创建新表，up
 a、一对一单向外键
 	@OneToOne(cascade=CascadeType.ALL) 一对一关系，全部操作级联
 	@JoinColumn(name="foriegnKeyName",unique=true) name是被控方的主键，作为外键加到主控方的表中。需要注意的是应该先保存被控方，再保存主控方。
-	
+
+b、一对一双向外键
+	@OneToOne(mappedBy="card")   需要在被控方加入这个,这里的属性是指被主控方的哪个属性所控制，当然，是要写在主控方的对象的上面
+
+c、多对一单向外键
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.EAGER) 抓取策略多方一般是eager，一方是lazy
+	@JoinColumn(name="对方属性",referenceColumnName="通过对方属性映射成的字段名，也可以不要，默认是和属性名一样")  这两条是在多方持有的一方的引用上面加
+
+d、一对多单向外键
+	@OneToMany(cascade=CascadeType.ALL,fetch=FetchType.EAGER) 抓取策略多方一般是eager，一方是lazy
+	@JoinColumn(name="自己的哪个属性作为对方的外键，添加到了对方的表中"） 
+
+e、一对多(多对一)双向外键
+	总结一对多或者多对一，joincolumn总是写的一方的属性名，作为多方的外键。 且多方的fetch是eager，一方是lazy
+
+f、多对多单向外键
+	@ManyToMany
+	@JoinTable(
+		name="中间表的名字"，
+		joinColumns={@JoinColumn(name="主控方的外键")}，
+		inverseJoinColumns={@JoinColumn(name="被控方的外键")}
+	)
+
+g、多对多双向外键
+	比起单向外键，只是需要区分主被控方而已。
+	在被控方添加 @ManyToMany(mappedBy="主控方持有的被控方的集合的属性名")
